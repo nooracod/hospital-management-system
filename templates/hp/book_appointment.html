@@ -1,0 +1,48 @@
+{% extends 'hp/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card card-pastel p-5">
+            <h3 class="fw-bold mb-4 text-purple"><i class="bi bi-calendar-plus me-2"></i>رزرو نوبت آنلاین</h3>
+            
+            {% if message %}
+                <div class="alert alert-success rounded-pill text-center py-2 mb-4">{{ message }}</div>
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">انتخاب پزشک</label>
+                    <select name="doctor_id" class="form-select rounded-pill px-3" required>
+                        {% for doc in doctors %}
+                            <option value="{{ doc.id }}">دکتر {{ doc.user.get_full_name|default:doc.user.username }} - {{ doc.specialization }} (ویزیت: {{ doc.fee }} تومان)</option>
+                        {% empty %}
+                            <option value="">پزشکی در سیستم ثبت نشده است</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">تاریخ نوبت</label>
+                        <input type="date" name="date" class="form-control rounded-pill px-3" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">ساعت نوبت</label>
+                        <select name="time_slot" class="form-select rounded-pill px-3" required>
+                            <option value="09:00 - 10:00">09:00 تا 10:00</option>
+                            <option value="10:00 - 11:00">10:00 تا 11:00</option>
+                            <option value="16:00 - 17:00">16:00 تا 17:00</option>
+                            <option value="17:00 - 18:00">17:00 تا 18:00</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-pastel-primary rounded-pill w-100 py-2 mt-3">ثبت و رزرو نوبت</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

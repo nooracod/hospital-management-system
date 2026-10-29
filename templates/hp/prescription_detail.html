@@ -1,0 +1,77 @@
+{% extends 'hp/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-9">
+        <div class="card card-pastel p-5">
+            <h3 class="fw-bold mb-4 text-purple"><i class="bi bi-file-earmark-medical me-2"></i>نسخه الکترونیک بیماران</h3>
+            
+            <div class="bg-light p-3 rounded-3 mb-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="mb-1"><strong>بیمار:</strong> {{ appointment.patient.get_full_name|default:appointment.patient.username }}</p>
+                    <p class="mb-0 text-muted"><strong>تاریخ نوبت:</strong> {{ appointment.date }} - {{ appointment.time_slot }}</p>
+                </div>
+                <div class="text-end">
+                    <p class="mb-1"><strong>پزشک معالج:</strong> دکتر {{ appointment.doctor.user.username }}</p>
+                    <span class="badge bg-purple text-dark">{{ appointment.doctor.specialization }}</span>
+                </div>
+            </div>
+
+            {% if user_role == 'doctor' %}
+                <div class="card p-3 mb-4 style="background-color: #f8f9fa;"">
+                    <h6 class="fw-bold text-primary mb-2"><i class="bi bi-magic me-1"></i> پیشنهاد دارویی سریع (بر اساس تخصص {{ appointment.doctor.specialization }}):</h6>
+                    <p class="small text-muted mb-2">با کلیک روی هر گزینه، دارو به نسخه اضافه می‌شود:</p>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for item in suggested_list %}
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill" onclick="addMed('{{ item.name }}', '{{ item.usage }}')">
+                                + {{ item.name }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">اقلام دارویی و روش مصرف</label>
+                        <textarea name="medicines" id="medsArea" class="form-control rounded-3 px-3 py-2" rows="5" placeholder="داروها و دستور مصرف را بنویسید یا از گزینه‌های بالا انتخاب کنید..." required>{% if prescription %}{{ prescription.medicines }}{% endif %}</textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">توصیه‌ها و دستورات تکمیلی پزشک</label>
+                        <textarea name="instructions" class="form-control rounded-3 px-3 py-2" rows="3" placeholder="ملاحظات غذایی، استراحت، زمان مراجعه بعدی و...">{% if prescription %}{{ prescription.instructions }}{% endif %}</textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-pastel-primary rounded-pill px-4">ذخیره و ثبت نسخه</button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary rounded-pill px-4 me-2">بازگشت</a>
+                </form>
+
+            {% else %}
+                {% if prescription %}
+                    <div class="bg-light p-4 rounded-3 mb-4 border-start border-4 border-success">
+                        <h5 class="fw-bold text-success mb-3"><i class="bi bi-capsule me-2"></i>داروهای تجویز شده:</h5>
+                        <p style="white-space: pre-line;" class="fs-6">{{ prescription.medicines }}</p>
+                        
+                        {% if prescription.instructions %}
+                            <hr>
+                            <h5 class="fw-bold text-info mb-2"><i class="bi bi-info-circle me-2"></i>دستورات پزشک:</h5>
+                            <p style="white-space: pre-line;">{{ prescription.instructions }}</p>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning text-center rounded-pill">هنوز نسخه‌ای برای این نوبت توسط پزشک ثبت نشده است.</div>
+                {% endif %}
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary rounded-pill px-4">بازگشت به داشبورد</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function addMed(name, usage) {
+    var area = document.getElementById('medsArea');
+    var textToAdd = "• " + name + " -> روش مصرف: " + usage + "\n";
+    area.value += textToAdd;
+}
+</script>
+{% endblock %}

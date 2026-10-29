@@ -1,0 +1,287 @@
+{% extends 'hp/base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card card-pastel p-4 d-flex flex-row align-items-center justify-content-between" style="background: linear-gradient(135deg, #ffffff, #f0f4ff);">
+            <div>
+                <h3 class="fw-bold text-dark mb-1">سلام، {{ user.get_full_name|default:user.username }} 👋</h3>
+                <p class="text-muted mb-0">نقش شما در سامانه: <span class="badge px-3 py-2 text-dark" style="background-color: var(--pastel-purple);">{{ profile.get_role_display|default:"کاربر" }}</span></p>
+            </div>
+            <div>
+                <a href="{% url 'home' %}" class="btn btn-outline-secondary rounded-pill px-3 me-2">صفحه اصلی</a>
+                {% if profile.role == 'staff' %}
+                    <a href="/admin/" class="btn btn-primary rounded-pill px-3" target="_blank">ورود به پنل پیشرفته ادمین</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if profile.role == 'patient' %}
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="card card-pastel p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-calendar-check text-primary me-2"></i> نوبت‌های ثبت‌شده شما</h5>
+            {% if appointments %}
+                <ul class="list-group list-group-flush">
+                    {% for app in appointments %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent py-3">
+                            <div>
+                                <h6 class="mb-1 fw-bold">دکتر {{ app.doctor.user.username }} ({{ app.doctor.specialization }})</h6>
+                                <p class="small text-muted mb-0">تاریخ: {{ app.date }} | ساعت: {{ app.time_slot }}</p>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                {% if app.status == 'confirmed' %}
+                                    <span class="badge bg-success rounded-pill px-3 py-2">تایید شده</span>
+                                    <a href="{% url 'prescription_view' app.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">مشاهده نسخه</a>
+                                {% elif app.status == 'canceled' %}
+                                    <span class="badge bg-danger rounded-pill px-3 py-2">لغو شده</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark rounded-pill px-3 py-2">در انتظار تایید</span>
+                                    <a href="{% url 'delete_appointment' app.id %}" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="return confirm('آیا از لغو این نوبت اطمینان دارید؟')">لغو نوبت</a>
+                                {% endif %}
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted mb-0">شما هیچ نوبت فعالی ندارید.</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-pastel p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-plus-circle text-success me-2"></i> رزرو نوبت جدید</h5>
+            <p class="small text-muted">پزشک مورد نظر خود را انتخاب کرده و نوبت رزرو کنید.</p>
+            <a href="{% url 'book_appointment' %}" class="btn btn-pastel-success rounded-pill w-100 mt-2">مشاهده پزشکان و رزرو</a>
+        </div>
+    </div>
+</div>
+
+{% elif profile.role == 'doctor' %}
+<div class="row g-4">
+    <div class="col-md-12">
+        <div class="card card-pastel p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-person-badge text-primary me-2"></i> نوبت‌های بیماران شما</h5>
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>نام بیمار</th>
+                        <th>تاریخ و ساعت</th>
+                        <th>وضعیت نوبت</th>
+                        <th>عملیات / نسخه</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in appointments %}
+                    <tr>
+                        <td>{{ app.patient.username }}</td>
+                        <td>{{ app.date }} - {{ app.time_slot }}</td>
+                        <td>
+                            {% if app.status == 'confirmed' %}
+                                <span class="badge bg-success">تایید شده</span>
+                            {% elif app.status == 'canceled' %}
+                                <span class="badge bg-danger">لغو شده</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">در انتظار تایید</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if app.status == 'pending' %}
+                                <a href="{% url 'update_appointment_status' app.id 'confirmed' %}" class="btn btn-sm btn-success rounded-pill">تایید نوبت</a>
+                                <a href="{% url 'update_appointment_status' app.id 'canceled' %}" class="btn btn-sm btn-danger rounded-pill">لغو نوبت</a>
+                            {% elif app.status == 'confirmed' %}
+                                <a href="{% url 'prescription_view' app.id %}" class="btn btn-sm btn-primary rounded-pill">نوشتن / ویرایش نسخه</a>
+                            {% else %}
+                                <span class="text-muted small">لغو شده</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-muted text-center py-3">هیچ نوبتی برای شما ثبت نشده است.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% elif profile.role == 'nurse' %}
+<div class="row g-4">
+    <div class="col-md-12">
+        <div class="card card-pastel p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-heart-pulse text-danger me-2"></i> لیست بیماران و نوبت‌های تاییدشده جهت پذیرش</h5>
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>نام بیمار</th>
+                        <th>پزشک مربوطه</th>
+                        <th>تاریخ و ساعت</th>
+                        <th>مشاهده نسخه</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in appointments %}
+                    <tr>
+                        <td>{{ app.patient.username }}</td>
+                        <td>دکتر {{ app.doctor.user.username }} ({{ app.doctor.specialization }})</td>
+                        <td>{{ app.date }} - {{ app.time_slot }}</td>
+                        <td>
+                            <a href="{% url 'prescription_view' app.id %}" class="btn btn-sm btn-outline-info rounded-pill">مشاهده نسخه</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-muted text-center py-3">نوبت تاییدشده‌ای جهت پذیرش وجود ندارد.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<div class="row g-4">
+    <div class="col-md-12">
+        <div class="card card-pastel p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-calendar-range text-primary me-2"></i> ۱. مدیریت کل نوبت‌های بیمارستان</h5>
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>بیمار</th>
+                        <th>پزشک</th>
+                        <th>تاریخ و ساعت</th>
+                        <th>وضعیت</th>
+                        <th>عملیات مدیریت</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in appointments %}
+                    <tr>
+                        <td>{{ app.patient.username }}</td>
+                        <td>دکتر {{ app.doctor.user.username }} ({{ app.doctor.specialization }})</td>
+                        <td>{{ app.date }} - {{ app.time_slot }}</td>
+                        <td>
+                            {% if app.status == 'confirmed' %}
+                                <span class="badge bg-success">تایید شده</span>
+                            {% elif app.status == 'canceled' %}
+                                <span class="badge bg-danger">لغو شده</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">در انتظار تایید</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if app.status == 'pending' %}
+                                <a href="{% url 'update_appointment_status' app.id 'confirmed' %}" class="btn btn-sm btn-success rounded-pill">تایید</a>
+                                <a href="{% url 'update_appointment_status' app.id 'canceled' %}" class="btn btn-sm btn-warning rounded-pill">لغو</a>
+                            {% endif %}
+                            <a href="{% url 'delete_appointment' app.id %}" class="btn btn-sm btn-danger rounded-pill" onclick="return confirm('حذف نوبت؟')">حذف نوبت</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-muted text-center py-3">هیچ نوبتی ثبت نشده است.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card card-pastel p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-person-badge text-success me-2"></i> ۲. لیست پزشکان (امکان اخراج / حذف)</h5>
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>نام پزشک</th>
+                        <th>تخصص</th>
+                        <th>عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in doctors %}
+                    <tr>
+                        <td>دکتر {{ doc.user.username }}</td>
+                        <td><span class="badge bg-info text-dark">{{ doc.specialization }}</span></td>
+                        <td>
+                            <a href="{% url 'delete_user' doc.user.id %}" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('آیا از حذف این پزشک اطمینان دارید؟')">اخراج / حذف</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-muted text-center py-2">پزشکی ثبت نشده است.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card card-pastel p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-people text-warning me-2"></i> ۳. لیست بیماران (حذف پرونده)</h5>
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>نام بیمار</th>
+                        <th>شماره همراه</th>
+                        <th>عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in patients %}
+                    <tr>
+                        <td>{{ p.user.username }}</td>
+                        <td>{{ p.phone_number|default:"-" }}</td>
+                        <td>
+                            <a href="{% url 'delete_user' p.user.id %}" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('آیا از حذف این بیمار اطمینان دارید؟')">حذف پرونده</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-muted text-center py-2">بیماری ثبت نشده است.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+<div class="row g-4 mt-2">
+    <div class="col-md-12">
+        <div class="card card-pastel p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-heart-pulse text-danger me-2"></i> ۴. لیست پرستاران (امکان اخراج / حذف)</h5>
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>نام پرستار</th>
+                        <th>شماره همراه</th>
+                        <th>عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for n in nurses %}
+                    <tr>
+                        <td>پرستار {{ n.user.username }}</td>
+                        <td>{{ n.phone_number|default:"-" }}</td>
+                        <td>
+                            <a href="{% url 'delete_user' n.user.id %}" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('آیا از حذف این پرستار اطمینان دارید؟')">اخراج / حذف</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-muted text-center py-2">پرستاری ثبت نشده است.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

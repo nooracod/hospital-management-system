@@ -1,0 +1,54 @@
+{% extends 'hp/base.html' %}
+
+{% block content %}
+<div class="row align-items-center my-5 p-5 rounded-4" style="background: linear-gradient(135deg, var(--pastel-blue), var(--pastel-purple)); color: #fff;">
+    <div class="col-lg-7">
+        <h1 class="fw-bold display-5 mb-3">سامانه نوبت‌دهی و خدمات آنلاین بیمارستان</h1>
+        <p class="fs-5 mb-4 opacity-90">بهترین پزشکان و متخصصان در کنار شما هستند. به راحتی نقش خود را انتخاب کنید، نوبت بگیرید و پرونده‌های خود را مدیریت کنید.</p>
+        <a href="{% url 'register' %}" class="btn btn-light btn-lg rounded-pill px-5 fw-bold text-dark shadow-sm">شروع کنید / ثبت‌نام</a>
+    </div>
+    <div class="col-lg-5 text-center mt-4 mt-lg-0">
+        <i class="bi bi-heart-pulse display-1" style="font-size: 10rem; opacity: 0.8;"></i>
+    </div>
+</div>
+
+<h3 class="fw-bold mb-4 text-center">خدمات و بخش‌های بیمارستان</h3>
+<div class="row g-4">
+    <div class="col-md-3">
+        <div class="card card-pastel p-4 text-center">
+            <div class="rounded-circle mx-auto p-3 mb-3" style="background: var(--pastel-pink); width: 70px;">
+                <i class="bi bi-person-badge fs-2 text-danger"></i>
+            </div>
+            <h5>پزشکان متخصص</h5>
+            <p class="text-muted small">دسترسی به لیست کامل پزشکان و رزرو نوبت آنلاین</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-pastel p-4 text-center">
+            <div class="rounded-circle mx-auto p-3 mb-3" style="background: var(--pastel-green); width: 70px;">
+                <i class="bi bi-calendar-check fs-2 text-success"></i>
+            </div>
+            <h5>نوبت‌دهی سریع</h5>
+            <p class="text-muted small">انتخاب زمان و روز دلخواه بدون نیاز به حضور فیزیکی</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-pastel p-4 text-center">
+            <div class="rounded-circle mx-auto p-3 mb-3" style="background: var(--pastel-yellow); width: 70px;">
+                <i class="bi bi-file-earmark-medical fs-2 text-warning"></i>
+            </div>
+            <h5>پرونده الکترونیک</h5>
+            <p class="text-muted small">مشاهده سوابق پزشکی و آزمایش‌ها به صورت آنلاین</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-pastel p-4 text-center">
+            <div class="rounded-circle mx-auto p-3 mb-3" style="background: var(--pastel-blue); width: 70px;">
+                <i class="bi bi-receipt fs-2 text-primary"></i>
+            </div>
+            <h5>صورت‌حساب و پرداخت</h5>
+            <p class="text-muted small">مشاهده و پرداخت آنلاین فاکتورهای درمانی</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

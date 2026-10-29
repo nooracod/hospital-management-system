@@ -1,0 +1,87 @@
+{% extends 'hp/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card card-pastel p-5">
+            <h3 class="fw-bold mb-4 text-center text-purple" style="color: #6c5ce7;">ثبت‌نام کاربر جدید</h3>
+            
+            {% if error %}
+                <div class="alert alert-danger rounded-pill text-center py-2 mb-3">{{ error }}</div>
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label class="form-label">نام کاربری</label>
+                    <input type="text" name="username" class="form-control rounded-pill px-3" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">رمز عبور</label>
+                    <input type="password" name="password" class="form-control rounded-pill px-3" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">نقش شما در بیمارستان چیست؟</label>
+                    <select name="role" id="roleSelect" class="form-select rounded-pill px-3" onchange="toggleSpecialization()">
+                        <option value="patient">بیمار / مراجعه‌کننده</option>
+                        <option value="doctor">پزشک</option>
+                        <option value="nurse">پرستار</option>
+                        <option value="staff">کارمند اداری</option>
+                    </select>
+                </div>
+
+                <div class="mb-3 d-none" id="specBox">
+                    <label class="form-label fw-bold">تخصص پزشکی</label>
+                    <select name="specialization_select" id="specSelect" class="form-select rounded-pill px-3 mb-2" onchange="checkCustomSpec()">
+                        <option value="عمومی">پزشک عمومی</option>
+                        <option value="قلب و عروق">متخصص قلب و عروق</option>
+                        <option value="پوست و مو">متخصص پوست و مو</option>
+                        <option value="اطفال">متخصص اطفال (کودکان)</option>
+                        <option value="داخلی">متخصص داخلی</option>
+                        <option value="اعصاب و روان">متخصص اعصاب و روان (روانپزشک)</option>
+                        <option value="ارتوپدی">متخصص ارتوپدی (استخوان و مفاصل)</option>
+                        <option value="زنان و زایمان">متخصص زنان و زایمان</option>
+                        <option value="custom">-- تخصص جدید (تایپ دستی) --</option>
+                    </select>
+                    
+                    <input type="text" name="specialization_custom" id="specCustom" placeholder="عنوان تخصص جدید را بنویسید..." class="form-control rounded-pill px-3 d-none">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">شماره همراه</label>
+                    <input type="text" name="phone" class="form-control rounded-pill px-3">
+                </div>
+
+                <button type="submit" class="btn btn-pastel-primary rounded-pill w-100 py-2 mt-3">ایجاد حساب کاربری</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleSpecialization() {
+    var role = document.getElementById('roleSelect').value;
+    var specBox = document.getElementById('specBox');
+    if (role === 'doctor') {
+        specBox.classList.remove('d-none');
+    } else {
+        specBox.classList.add('d-none');
+    }
+}
+
+function checkCustomSpec() {
+    var specSelect = document.getElementById('specSelect').value;
+    var specCustom = document.getElementById('specCustom');
+    if (specSelect === 'custom') {
+        specCustom.classList.remove('d-none');
+        specCustom.required = true;
+    } else {
+        specCustom.classList.add('d-none');
+        specCustom.required = false;
+    }
+}
+</script>
+{% endblock %}

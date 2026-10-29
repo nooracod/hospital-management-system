@@ -1,0 +1,33 @@
+{% extends 'hp/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card card-pastel p-5">
+            <h3 class="fw-bold mb-4 text-center text-purple" style="color: #6c5ce7;">ورود به سامانه بیمارستان</h3>
+            
+            {% if error %}
+                <div class="alert alert-danger rounded-pill text-center py-2 mb-3">{{ error }}</div>
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">نام کاربری</label>
+                    <input type="text" name="username" class="form-control rounded-pill px-3" required>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="form-label">رمز عبور</label>
+                    <input type="password" name="password" class="form-control rounded-pill px-3" required>
+                </div>
+
+                <button type="submit" class="btn btn-pastel-primary rounded-pill w-100 py-2">ورود به حساب</button>
+            </form>
+            <div class="text-center mt-4">
+                <p class="small text-muted">حساب کاربری ندارید؟ <a href="{% url 'register' %}" class="fw-bold text-decoration-none" style="color: #6c5ce7;">ثبت‌نام کنید</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
